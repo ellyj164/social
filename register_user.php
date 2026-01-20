@@ -134,6 +134,17 @@ if (!$pdo) {
 }
 
 try {
+    // Check if first name is already registered (no duplicate first names allowed)
+    $checkStmt = $pdo->prepare("SELECT id FROM users WHERE first_name = ? LIMIT 1");
+    $checkStmt->execute([$firstName]);
+    if ($checkStmt->fetch()) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Sorry, "' . $firstName . '" has already been registered. Only one person with this first name can participate.'
+        ]);
+        exit;
+    }
+    
     // Hash the password before storing
     $passwordHash = password_hash($password, PASSWORD_DEFAULT);
     
