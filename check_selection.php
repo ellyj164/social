@@ -324,7 +324,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             button {
                 padding: 14px;
-                font-size: 15px;
+                font-size: 16px;
             }
             
             .selection-display .name {

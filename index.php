@@ -617,8 +617,7 @@ $companyName = COMPANY_NAME;
             /* Registration form mobile fixes */
             .registration-form { 
                 padding: 20px; 
-                width: 95%; 
-                max-width: 95%;
+                width: 95%;
             }
             
             .registration-form h2 { 
