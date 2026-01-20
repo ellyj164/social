@@ -291,7 +291,11 @@ Once again, congratulations on your selection! &#127882;
 $headers = "MIME-Version: 1.0\r\n";
 $headers .= "Content-type: text/html; charset=UTF-8\r\n";
 $headers .= "From: " . FROM_NAME . " <" . FROM_EMAIL . ">\r\n";
-$headers .= "Bcc: " . ADMIN_EMAIL . "\r\n"; // BCC admin for tracking
+
+// Validate and add admin BCC (extra safety even though it's a constant)
+if (defined('ADMIN_EMAIL') && filter_var(ADMIN_EMAIL, FILTER_VALIDATE_EMAIL)) {
+    $headers .= "Bcc: " . ADMIN_EMAIL . "\r\n"; // BCC admin for tracking
+}
 
 $emailSent = @mail($email, $subject, $htmlMessage, $headers);
 

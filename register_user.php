@@ -66,8 +66,8 @@ if ($expectedSecretLetter === null) {
 if ($secretLetter !== $expectedSecretLetter) {
     echo json_encode([
         'success' => false, 
-        'message' => 'Invalid secret letter. The secret letter for "' . $firstName . '" should be the 3rd letter of your first name.'
-    ]);
+        'message' => 'Invalid secret letter. The secret letter for "' . htmlspecialchars($firstName, ENT_QUOTES, 'UTF-8') . '" should be the 3rd letter of your first name.'
+    ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
     exit;
 }
 
@@ -132,8 +132,8 @@ try {
     if ($checkStmt->fetch()) {
         echo json_encode([
             'success' => false,
-            'message' => 'Sorry, "' . $firstName . '" has already been registered. Only one person with this first name can participate.'
-        ]);
+            'message' => 'Sorry, "' . htmlspecialchars($firstName, ENT_QUOTES, 'UTF-8') . '" has already been registered. Only one person with this first name can participate.'
+        ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
         exit;
     }
     
