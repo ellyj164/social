@@ -66,8 +66,8 @@ if ($expectedSecretLetter === null) {
 if ($secretLetter !== $expectedSecretLetter) {
     echo json_encode([
         'success' => false, 
-        'message' => 'Invalid secret letter. The secret letter for "' . $firstName . '" should be the 3rd letter of your first name.'
-    ]);
+        'message' => 'Invalid secret letter. The secret letter for "' . htmlspecialchars($firstName, ENT_QUOTES, 'UTF-8') . '" should be the 3rd letter of your first name.'
+    ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
     exit;
 }
 
@@ -103,17 +103,9 @@ if ($existingSelection) {
     exit;
 }
 
-// Check if this person has been selected by someone else
-$hasBeenSelected = checkIfUserHasBeenSelected($firstName);
-if ($hasBeenSelected) {
-    echo json_encode([
-        'success' => false,
-        'message' => 'You have already been selected by someone! Your kakawetee is waiting for you.',
-        'already_been_selected' => true,
-        'selected_by' => $hasBeenSelected['selector_name']
-    ]);
-    exit;
-}
+// NOTE: We do NOT block if this person has been selected by someone else
+// They can still spin (if they haven't selected yet), but they cannot be selected again
+// The backend (send_email.php) will handle skipping them if wheel lands on them
 
 $pdo = getDBConnection();
 if (!$pdo) {
@@ -134,6 +126,17 @@ if (!$pdo) {
 }
 
 try {
+    // Check if first name is already registered (no duplicate first names allowed)
+    $checkStmt = $pdo->prepare("SELECT id FROM users WHERE first_name = ? LIMIT 1");
+    $checkStmt->execute([$firstName]);
+    if ($checkStmt->fetch()) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Sorry, "' . htmlspecialchars($firstName, ENT_QUOTES, 'UTF-8') . '" has already been registered. Only one person with this first name can participate.'
+        ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+        exit;
+    }
+    
     // Hash the password before storing
     $passwordHash = password_hash($password, PASSWORD_DEFAULT);
     

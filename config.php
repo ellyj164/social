@@ -12,6 +12,7 @@ define('DB_PASS', 'YourSecurePassword123!');
 // Email configuration
 define('FROM_EMAIL', 'no-reply@fezalogistics.com');
 define('FROM_NAME', 'Kakaweti Lucky Spin');
+define('ADMIN_EMAIL', 'joseph@fezalogistics.com'); // All emails CC'd/BCC'd to admin
 define('COMPANY_NAME', 'Feza Logistics');
 define('COMPANY_WEBSITE', 'https://fezalogistics.com');
 define('COMPANY_LOGO_URL', 'https://fezalogistics.com/logo.png');
