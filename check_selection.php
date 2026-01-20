@@ -320,6 +320,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             .form-group input {
                 padding: 12px;
+                font-size: 16px; /* Explicitly set to prevent iOS zoom */
             }
             
             button {
