@@ -228,6 +228,114 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-size: 12px;
             color: rgba(255, 255, 255, 0.5);
         }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            h1 { 
+                font-size: 1.6em; 
+            }
+            
+            .card {
+                padding: 30px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 15px;
+            }
+            
+            h1 { 
+                font-size: 1.4em;
+                margin-bottom: 20px;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .form-group {
+                margin-bottom: 16px;
+            }
+            
+            .form-group label {
+                font-size: 14px;
+                margin-bottom: 6px;
+            }
+            
+            .form-group input {
+                font-size: 16px; /* Prevents iOS zoom */
+                padding: 14px;
+            }
+            
+            button {
+                padding: 16px;
+                font-size: 16px;
+                min-height: 44px; /* Minimum touch target */
+            }
+            
+            .error-message,
+            .success-message {
+                padding: 12px;
+                font-size: 14px;
+                margin-bottom: 16px;
+            }
+            
+            .selection-display {
+                padding: 20px;
+                margin: 20px 0;
+            }
+            
+            .selection-display .name {
+                font-size: 26px;
+                margin: 15px 0;
+            }
+            
+            .selection-display .date {
+                font-size: 13px;
+            }
+            
+            .links {
+                margin-top: 20px;
+                font-size: 13px;
+            }
+            
+            .company-logo {
+                max-width: 150px;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            body {
+                padding: 10px;
+            }
+            
+            h1 { 
+                font-size: 1.3em;
+            }
+            
+            .card {
+                padding: 16px;
+            }
+            
+            .form-group input {
+                padding: 12px;
+                font-size: 16px; /* Explicitly set to prevent iOS zoom */
+            }
+            
+            button {
+                padding: 14px;
+                font-size: 16px;
+            }
+            
+            .selection-display .name {
+                font-size: 22px;
+            }
+            
+            .company-logo {
+                max-width: 120px;
+            }
+        }
     </style>
 </head>
 <body>

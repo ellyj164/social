@@ -613,14 +613,98 @@ $companyName = COMPANY_NAME;
         @media (max-width: 480px) {
             .spinner-container { max-width: 300px; }
             h1 { font-size: 1.3em; }
-            .registration-form { padding: 25px; width: 95%; }
-            .form-group input { font-size: 16px; } /* Prevents iOS zoom */
-            button { padding: 12px 20px; font-size: 16px; }
+            
+            /* Registration form mobile fixes */
+            .registration-form { 
+                padding: 20px; 
+                width: 95%;
+            }
+            
+            .registration-form h2 { 
+                font-size: 22px;
+                margin: 0 0 8px 0;
+            }
+            
+            .registration-form p { 
+                font-size: 14px;
+                margin: 0 0 20px 0;
+            }
+            
+            /* Hide decorative emojis on form for mobile */
+            .registration-form::before,
+            .registration-form::after {
+                display: none;
+            }
+            
+            /* Hide floating emojis on mobile */
+            .floating-emoji {
+                display: none;
+            }
+            
+            .form-group { 
+                margin-bottom: 16px; 
+            }
+            
+            .form-group label { 
+                font-size: 14px;
+                margin-bottom: 6px;
+            }
+            
+            .form-group input { 
+                font-size: 16px; /* Prevents iOS zoom */
+                padding: 14px;
+            }
+            
+            .form-group .hint { 
+                font-size: 12px;
+            }
+            
+            .btn-enter {
+                padding: 16px;
+                font-size: 18px;
+                margin: 20px 0 0 0;
+                min-height: 44px; /* Minimum touch target */
+            }
+            
+            button { 
+                padding: 12px 20px; 
+                font-size: 16px;
+                min-height: 44px; /* Minimum touch target */
+            }
+            
+            .error-message {
+                padding: 10px;
+                font-size: 13px;
+                margin-bottom: 16px;
+            }
         }
 
         @media (max-width: 360px) {
             .spinner-container { max-width: 280px; }
             h1 { font-size: 1.2em; }
+            
+            /* Further reduce for very small screens */
+            .registration-form { 
+                padding: 16px;
+                width: 98%;
+            }
+            
+            .registration-form h2 { 
+                font-size: 20px;
+            }
+            
+            .registration-form p { 
+                font-size: 13px;
+            }
+            
+            .form-group input { 
+                padding: 12px;
+            }
+            
+            .btn-enter {
+                padding: 14px;
+                font-size: 16px;
+            }
         }
         
         /* Glowing pointer at final stop */
