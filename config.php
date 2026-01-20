@@ -481,11 +481,11 @@ function verifyUserDevice($firstName, $email, $password, $deviceFingerprint) {
             'message' => 'You must use your original device to access this platform'
         ];
     } else {
-        // Invalid credentials
+        // Invalid credentials - use generic message to avoid user enumeration
         return [
             'valid' => false,
             'reason' => 'invalid_credentials',
-            'message' => 'Invalid credentials'
+            'message' => 'Invalid username or password'
         ];
     }
 }

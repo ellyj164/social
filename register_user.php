@@ -103,6 +103,7 @@ if (isset($verification['is_returning']) && $verification['is_returning']) {
         // Return success with their existing selection - show dashboard with locked button
         $participants = getAllParticipantsExcept($firstName);
         
+        // Fallback to default participants if database query fails
         if (empty($participants)) {
             $participants = array_values(array_filter(DEFAULT_PARTICIPANTS, function($name) use ($firstName) {
                 return $name !== $firstName;
@@ -124,6 +125,7 @@ if (isset($verification['is_returning']) && $verification['is_returning']) {
         // Returning user but hasn't made a selection yet - allow them to play
         $participants = getAllParticipantsExcept($firstName);
         
+        // Fallback to default participants if database query fails
         if (empty($participants)) {
             $participants = array_values(array_filter(DEFAULT_PARTICIPANTS, function($name) use ($firstName) {
                 return $name !== $firstName;
