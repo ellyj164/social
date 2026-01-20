@@ -418,4 +418,75 @@ function isValidParticipant($firstName) {
         return in_array($firstName, DEFAULT_PARTICIPANTS);
     }
 }
+
+/**
+ * Get user by first name
+ * @param string $firstName
+ * @return array|null Returns user data if found, null otherwise
+ */
+function getUserByFirstName($firstName) {
+    $pdo = getDBConnection();
+    if (!$pdo) {
+        return null;
+    }
+    
+    try {
+        $stmt = $pdo->prepare("SELECT id, full_name, first_name, email, password_hash, device_fingerprint FROM users WHERE first_name = ? LIMIT 1");
+        $stmt->execute([$firstName]);
+        return $stmt->fetch();
+    } catch (PDOException $e) {
+        error_log("Error getting user by first name: " . $e->getMessage());
+        return null;
+    }
+}
+
+/**
+ * Verify if user credentials and device match
+ * @param string $firstName
+ * @param string $email
+ * @param string $password
+ * @param string $deviceFingerprint
+ * @return array Result with 'valid', 'message', 'user', and 'reason' keys
+ */
+function verifyUserDevice($firstName, $email, $password, $deviceFingerprint) {
+    $user = getUserByFirstName($firstName);
+    
+    if (!$user) {
+        // User doesn't exist - this is a new registration
+        return [
+            'valid' => true,
+            'is_new' => true,
+            'message' => 'New user registration'
+        ];
+    }
+    
+    // User exists - verify credentials
+    $passwordMatch = password_verify($password, $user['password_hash']);
+    $emailMatch = ($email === $user['email']);
+    $deviceMatch = ($deviceFingerprint === $user['device_fingerprint']);
+    
+    if ($passwordMatch && $emailMatch && $deviceMatch) {
+        // Same user, same device - allow login
+        return [
+            'valid' => true,
+            'is_returning' => true,
+            'user' => $user,
+            'message' => 'Welcome back'
+        ];
+    } elseif ($passwordMatch && $emailMatch && !$deviceMatch) {
+        // Same user, different device - block
+        return [
+            'valid' => false,
+            'reason' => 'different_device',
+            'message' => 'You must use your original device to access this platform'
+        ];
+    } else {
+        // Invalid credentials - use generic message to avoid user enumeration
+        return [
+            'valid' => false,
+            'reason' => 'invalid_credentials',
+            'message' => 'Invalid username or password'
+        ];
+    }
+}
 ?>

@@ -1073,8 +1073,24 @@ $companyName = COMPANY_NAME;
                     
                     resizeCanvas();
                     drawWheel(0);
+                    
+                    // Check if this is a returning user who already selected
+                    if (data.is_returning && data.already_selected && data.selected_name) {
+                        // User has already made a selection - show wheel but lock button
+                        userData.alreadySelected = true;
+                        userData.selectedName = data.selected_name;
+                        
+                        // Lock the button permanently
+                        spinBtn.disabled = true;
+                        spinBtn.innerText = 'ALREADY SELECTED';
+                        spinBtn.style.background = 'gray';
+                        
+                        // Show result message
+                        resultDiv.innerHTML = '🎉 Your kakawetee is: <span>' + data.selected_name + '</span>';
+                        resultDiv.classList.add('show');
+                    }
                 } else {
-                    // Check if this is the "already selected" case
+                    // Check if this is the "already selected" case (legacy response)
                     if (data.already_selected && data.selected_name) {
                         // User has already made a selection - show wheel but lock button
                         userData.fullName = fullName;

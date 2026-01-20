@@ -80,25 +80,77 @@ if (empty($deviceFingerprint)) {
     $deviceFingerprint = generateDeviceFingerprint($ipAddress, $userAgent);
 }
 
-// Check if device is already locked (has made a selection)
+// Check if user exists and verify credentials + device
+$verification = verifyUserDevice($firstName, $email, $password, $deviceFingerprint);
+
+if (!$verification['valid']) {
+    // User exists but credentials/device don't match
+    echo json_encode([
+        'success' => false,
+        'message' => $verification['message']
+    ]);
+    exit;
+}
+
+// If this is a returning user (same person, same device)
+if (isset($verification['is_returning']) && $verification['is_returning']) {
+    $user = $verification['user'];
+    
+    // Check if they already made a selection
+    $existingSelection = checkUserAlreadySelected($firstName, $deviceFingerprint);
+    
+    if ($existingSelection) {
+        // Return success with their existing selection - show dashboard with locked button
+        $participants = getAllParticipantsExcept($firstName);
+        
+        // Fallback to default participants if database query fails
+        if (empty($participants)) {
+            $participants = array_values(array_filter(DEFAULT_PARTICIPANTS, function($name) use ($firstName) {
+                return $name !== $firstName;
+            }));
+        }
+        
+        echo json_encode([
+            'success' => true,
+            'is_returning' => true,
+            'user_id' => $user['id'],
+            'first_name' => $firstName,
+            'participants' => $participants,
+            'already_selected' => true,
+            'selected_name' => $existingSelection['selected_name'],
+            'message' => 'Welcome back, ' . $firstName . '!'
+        ]);
+        exit;
+    } else {
+        // Returning user but hasn't made a selection yet - allow them to play
+        $participants = getAllParticipantsExcept($firstName);
+        
+        // Fallback to default participants if database query fails
+        if (empty($participants)) {
+            $participants = array_values(array_filter(DEFAULT_PARTICIPANTS, function($name) use ($firstName) {
+                return $name !== $firstName;
+            }));
+        }
+        
+        echo json_encode([
+            'success' => true,
+            'is_returning' => true,
+            'user_id' => $user['id'],
+            'first_name' => $firstName,
+            'participants' => $participants,
+            'message' => 'Welcome back, ' . $firstName . '!'
+        ]);
+        exit;
+    }
+}
+
+// This is a new user - check if device is already locked
 $deviceLock = checkDeviceLock($deviceFingerprint);
 if ($deviceLock) {
     echo json_encode([
         'success' => false,
         'message' => 'This device has already been used for selection by ' . $deviceLock['first_name'],
         'device_locked' => true
-    ]);
-    exit;
-}
-
-// Check if user or device already made a selection
-$existingSelection = checkUserAlreadySelected($firstName, $deviceFingerprint);
-if ($existingSelection) {
-    echo json_encode([
-        'success' => false,
-        'message' => 'Sorry, your kakawetee is: ' . $existingSelection['selected_name'],
-        'already_selected' => true,
-        'selected_name' => $existingSelection['selected_name']
     ]);
     exit;
 }
@@ -126,32 +178,48 @@ if (!$pdo) {
 }
 
 try {
-    // Check if first name is already registered (no duplicate first names allowed)
-    $checkStmt = $pdo->prepare("SELECT id FROM users WHERE first_name = ? LIMIT 1");
-    $checkStmt->execute([$firstName]);
-    if ($checkStmt->fetch()) {
-        echo json_encode([
-            'success' => false,
-            'message' => 'Sorry, "' . htmlspecialchars($firstName, ENT_QUOTES, 'UTF-8') . '" has already been registered. Only one person with this first name can participate.'
-        ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
-        exit;
+    // For new users, check if first name is already registered
+    // (Returning users are already handled above)
+    if (!isset($verification['is_returning'])) {
+        $checkStmt = $pdo->prepare("SELECT id FROM users WHERE first_name = ? LIMIT 1");
+        $checkStmt->execute([$firstName]);
+        if ($checkStmt->fetch()) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Sorry, "' . htmlspecialchars($firstName, ENT_QUOTES, 'UTF-8') . '" has already been registered. Only one person with this first name can participate.'
+            ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+            exit;
+        }
     }
     
-    // Hash the password before storing
-    $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-    
-    // Save user with password, first_name and device_fingerprint
-    $insertStmt = $pdo->prepare("INSERT INTO users (full_name, first_name, email, password_hash, ip_address, user_agent, device_fingerprint) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    $insertStmt->execute([$fullName, $firstName, $email, $passwordHash, $ipAddress, $userAgent, $deviceFingerprint]);
-    $userId = $pdo->lastInsertId();
+    // Hash the password before storing (only for new users)
+    if (!isset($verification['is_returning'])) {
+        $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+        
+        // Save user with password, first_name and device_fingerprint
+        $insertStmt = $pdo->prepare("INSERT INTO users (full_name, first_name, email, password_hash, ip_address, user_agent, device_fingerprint) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $insertStmt->execute([$fullName, $firstName, $email, $passwordHash, $ipAddress, $userAgent, $deviceFingerprint]);
+        $userId = $pdo->lastInsertId();
 
-    // Create login session
-    try {
-        $sessionStmt = $pdo->prepare("INSERT INTO login_sessions (user_id, first_name, device_fingerprint, ip_address, user_agent) VALUES (?, ?, ?, ?, ?)");
-        $sessionStmt->execute([$userId, $firstName, $deviceFingerprint, $ipAddress, $userAgent]);
-    } catch (PDOException $e) {
-        // Log but don't fail if login_sessions table doesn't exist yet
-        error_log("Login session insert failed: " . $e->getMessage());
+        // Create login session
+        try {
+            $sessionStmt = $pdo->prepare("INSERT INTO login_sessions (user_id, first_name, device_fingerprint, ip_address, user_agent) VALUES (?, ?, ?, ?, ?)");
+            $sessionStmt->execute([$userId, $firstName, $deviceFingerprint, $ipAddress, $userAgent]);
+        } catch (PDOException $e) {
+            // Log but don't fail if login_sessions table doesn't exist yet
+            error_log("Login session insert failed: " . $e->getMessage());
+        }
+    } else {
+        // Returning user - use their existing ID
+        $userId = $verification['user']['id'];
+        
+        // Update login session for returning user
+        try {
+            $sessionStmt = $pdo->prepare("INSERT INTO login_sessions (user_id, first_name, device_fingerprint, ip_address, user_agent) VALUES (?, ?, ?, ?, ?)");
+            $sessionStmt->execute([$userId, $firstName, $deviceFingerprint, $ipAddress, $userAgent]);
+        } catch (PDOException $e) {
+            error_log("Login session insert failed: " . $e->getMessage());
+        }
     }
 
     // Get ALL participants except the logged-in user (maintains secret - no filtering by selection status)
