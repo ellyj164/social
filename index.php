@@ -1099,29 +1099,6 @@ $companyName = COMPANY_NAME;
                         // Show warning message
                         resultDiv.innerHTML = '⚠️ Sorry, your kakawetee is: <span>' + data.selected_name + '</span>';
                         resultDiv.classList.add('show');
-                    } else if (data.already_been_selected) {
-                        // User has been selected by someone else - show wheel but lock button
-                        userData.fullName = fullName;
-                        userData.email = email;
-                        userData.userId = 0;
-                        userData.alreadyBeenSelected = true;
-                        
-                        registrationOverlay.style.display = 'none';
-                        spinnerSection.style.display = 'block';
-                        displayName.innerText = fullName;
-                        
-                        // Show all participants on wheel (for visual purposes)
-                        resizeCanvas();
-                        drawWheel(0);
-                        
-                        // Lock the button permanently
-                        spinBtn.disabled = true;
-                        spinBtn.innerText = 'YOU\'VE BEEN SELECTED';
-                        spinBtn.style.background = 'gray';
-                        
-                        // Show message
-                        resultDiv.innerHTML = '🎉 You have already been selected by someone! Your kakawetee is waiting for you.';
-                        resultDiv.classList.add('show');
                     } else {
                         showError(data.message || 'Registration failed. Please try again.');
                         enterBtn.disabled = false;
@@ -1277,16 +1254,6 @@ $companyName = COMPANY_NAME;
                 spinBtn.innerText = 'ALREADY SELECTED';
                 spinBtn.style.background = 'gray';
                 resultDiv.innerHTML = '⚠️ Sorry, your kakawetee is: <span>' + userData.selectedName + '</span>';
-                resultDiv.classList.add('show');
-                return;
-            }
-            
-            // Check if user has been selected by someone
-            if (userData.alreadyBeenSelected) {
-                spinBtn.disabled = true;
-                spinBtn.innerText = 'YOU\'VE BEEN SELECTED';
-                spinBtn.style.background = 'gray';
-                resultDiv.innerHTML = '🎉 You have already been selected by someone! Your kakawetee is waiting for you.';
                 resultDiv.classList.add('show');
                 return;
             }

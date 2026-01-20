@@ -103,17 +103,9 @@ if ($existingSelection) {
     exit;
 }
 
-// Check if this person has been selected by someone else
-$hasBeenSelected = checkIfUserHasBeenSelected($firstName);
-if ($hasBeenSelected) {
-    echo json_encode([
-        'success' => false,
-        'message' => 'You have already been selected by someone! Your kakawetee is waiting for you.',
-        'already_been_selected' => true,
-        'selected_by' => $hasBeenSelected['selector_name']
-    ]);
-    exit;
-}
+// NOTE: We do NOT block if this person has been selected by someone else
+// They can still spin (if they haven't selected yet), but they cannot be selected again
+// The backend (send_email.php) will handle skipping them if wheel lands on them
 
 $pdo = getDBConnection();
 if (!$pdo) {
