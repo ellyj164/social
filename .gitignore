@@ -1,0 +1,3 @@
+nul
+*.sql
+!database.sql
